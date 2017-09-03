@@ -1,43 +1,68 @@
-const FFmpeg = require('ffmpeg')
-const _ = require('lodash')
-const fileExists = require('file-exists')
-const fs = require('fs')
+// Activate Google Cloud Trace and Debug when in production
+if (process.env.NODE_ENV === 'production') {
+    require('@google-cloud/trace-agent').start();
+    require('@google-cloud/debug-agent').start();
+}
 
-const LOGO_IMAGE_FILEPATH = './logo/logo.png';
-const LOGO_POSITION_FILEPATH = './logo/logo.json';
+const express = require('express');
+const logging = require('./lib/logging');
+const pubsub = require('./lib/pubsub');
+const storage = require('./lib/storage');
 
-let watermark = function (videoIn, videoInFilename, logo, logoPos) {
-    return new Promise(function (resolve, reject) {
-        videoIn.fnAddWatermark(logo, './output/' + videoInFilename, logoPos, function (error, file) {
-            if (!error) {
-                resolve(file);
-            } else {
-                reject(error);
-            }
-        });
+const TranscodingService = require('./services/transcoding');
+
+//Subscribing
+const defaultUnsubscribe = () => {
+    logging.warn('nothing to unsuscribe')
+};
+
+let unsubscribe = defaultUnsubscribe;
+
+const onError = err => {
+    logging.error('err', err);
+};
+
+const onMessage = message => {
+    logging.info(`Received message ${message.id}:`);
+    logging.info(`\tData: ${message.data}`);
+    logging.info(`\tAttributes: ${JSON.stringify(message.attributes)}`);
+
+    message.ack();
+    logging.info(`Message acknowledged ${message.id}`);
+};
+
+pubsub
+    .subscribe('test-subscription', onMessage, onError)
+    .then(unsubscribeFnc => {
+        unsubscribe = unsubscribeFnc;
+    })
+    .catch(err => {
+        logging.error('create subscription err', err);
     });
-};
 
-const transcode = (videoFilename) => {
-    try {
-        const transcodingProcess = new FFmpeg(videoFilename);
-        transcodingProcess.then(function (video) {
-            if (!fileExists.sync(LOGO_IMAGE_FILEPATH)) {
-                console.error('No logo.json specified for video ' + videoFilename);
-                return;
-            }
-            if (!fileExists.sync(LOGO_POSITION_FILEPATH)) {
-                console.error('No logo.json specified for video' + videoFilename);
-                return;
-            }
-            const logoPosObj = JSON.parse(fs.readFileSync(LOGO_POSITION_FILEPATH, 'utf8'));
-            watermark(video, videoFilename, LOGO_IMAGE_FILEPATH, logoPosObj).then( videoOutFilename => {
-                 return videoOutFilename;
-            });
-        }, function (err) {
-            console.error('Error: ' + err);
-        });
-    } catch (err) {
-        console.error('Error: ' + err);
-    }
-};
+//Express
+const app = express();
+
+app.use(logging.requestLogger);
+
+app.get('/', (req, res) => {
+    res.send('OK');
+});
+
+// Errors
+app.use(logging.errorLogger);
+
+app.use((req, res) => {
+    res.status(404).send('Not Found');
+});
+
+app.use((err, req, res, next) => {
+    res.status(500).send(err.response || 'Something broke!');
+});
+
+// Spin up
+const PORT = process.env.PORT || 8081;
+
+app.listen(PORT, function () {
+    logging.info(`app listening on port ${PORT}!`);
+});
