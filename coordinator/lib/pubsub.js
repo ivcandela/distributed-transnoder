@@ -12,23 +12,28 @@ const pubsub = (process.env.NODE_ENV === 'production') ? PubSub() : PubSub({
 });
 
 const topic = pubsub.topic(TOPIC);
-topic.exists().then(results => {
-    const exists = results[0];
-
-    if(!exists) {
-        logging.info('Topic does not exist yet');
-
-        topic.create().then(results => {
-            logging.info(`Topic ${TOPIC} created`)
-        }).catch(err => {
-            logging.error(`There was an error creating the topic ${TOPIC}`);
-        });
-    }
-}).catch(err => {
-    logging.error(`There was an error checking for the topic ${TOPIC} existence`);
-});
-
 const publisher = topic.publisher();
+
+const check = () => {
+    topic.exists().then(results => {
+
+        const exists = results[0];
+        if (!exists) {
+
+            logging.info(`Topic ${TOPIC} does not exist yet`);
+            topic.create().then(results => {
+                logging.info(`Topic ${TOPIC} created`)
+            }).catch(err => {
+                logging.error(`There was an error creating the topic ${TOPIC}`);
+            });
+        } else {
+            logging.info(`Topic ${TOPIC} exists. No need for creating`);
+        }
+    }).catch(err => {
+        logging.error(`There was an error checking for the topic ${TOPIC} existence`);
+    });
+
+};
 
 // PUBLISHING
 const publish = (message, attributes = {}) => {
@@ -45,27 +50,32 @@ const publish = (message, attributes = {}) => {
 
 // SUBSCRIBING
 const subscribe = (subscriptionName, onMessage, onError) => {
-    return topic.createSubscription(subscriptionName).then(subscriptions => {
-        const subscription = subscriptions[0];
-        subscription.on('error', onError);
-        subscription.on('message', onMessage);
+    logging.info(`subscribing ${subscriptionName}`);
 
-        const unsubscribe = () => {
-            // Remove listeners to stop pulling for messages.
-            logging.info(`unsubscribing ${subscriptionName}`);
-            subscription.removeListener('message', onMessage);
-            subscription.removeListener('error', onError);
-        };
+    return topic
+        .createSubscription(subscriptionName)
+        .then(subscriptions => {
+            const subscription = subscriptions[0];
+            subscription.on('error', onError);
+            subscription.on('message', onMessage);
 
-        return unsubscribe;
-    }).catch(err => {
-        logging.error(`create subscription ${subscriptionName} err`, err);
+            const unsubscribe = () => {
+                // Remove listeners to stop pulling for messages.
+                logging.info(`unsubscribing ${subscriptionName}`);
+                subscription.removeListener('message', onMessage);
+                subscription.removeListener('error', onError);
+            };
+            logging.info(`Subscribed ${subscriptionName}!`);
+            return unsubscribe;
+        }).catch(err => {
+            logging.error(`create subscription ${subscriptionName} err`, err);
 
-        throw err;
-    });
+            throw err;
+        });
 };
 
 module.exports = {
+    check,
     publish,
     subscribe,
 };
