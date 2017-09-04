@@ -12,7 +12,7 @@ const storage = (process.env.NODE_ENV === 'production') ? Storage() : Storage({
 const listFiles = (options = {}) =>
     storage
         .bucket(BUCKETNAME)
-        .getFiles()
+        .getFiles(options)
         .then((results) => {
             const files = results[0];
 
@@ -30,7 +30,9 @@ const listFiles = (options = {}) =>
 
 const listFilesByPrefix = prefix => listFiles({prefix});
 
+
 module.exports = {
+    BUCKETNAME,
     listFiles,
     listFilesByPrefix,
 };

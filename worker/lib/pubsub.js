@@ -12,25 +12,27 @@ const pubsub = (process.env.NODE_ENV === 'production') ? PubSub() : PubSub({
 });
 
 const topic = pubsub.topic(TOPIC);
-topic.exists().then(results => {
-    const exists = results[0];
-
-    if(!exists) {
-        logging.info(`Topic ${TOPIC} does not exist yet`);
-
-        topic.create().then(results => {
-            logging.info(`Topic ${TOPIC} created`)
-        }).catch(err => {
-            logging.error(`There was an error creating the topic ${TOPIC}`);
-        });
-    } else {
-        logging.info(`Topic ${TOPIC} exists. No need for creating`);
-    }
-}).catch(err => {
-    logging.error(`There was an error checking for the topic ${TOPIC} existence`);
-});
-
 const publisher = topic.publisher();
+
+const check = () => {
+    topic.exists().then(results => {
+        const exists = results[0];
+
+        if (!exists) {
+            logging.info(`Topic ${TOPIC} does not exist yet`);
+            topic.create().then(results => {
+                logging.info(`Topic ${TOPIC} created`)
+            }).catch(err => {
+                logging.error(`There was an error creating the topic ${TOPIC}`);
+            });
+        } else {
+            logging.info(`Topic ${TOPIC} exists. No need for creating`);
+        }
+    }).catch(err => {
+        logging.error(`There was an error checking for the topic ${TOPIC} existence`);
+    });
+
+};
 
 // PUBLISHING
 const publish = (message, attributes = {}) => {
@@ -70,6 +72,7 @@ const subscribe = (subscriptionName, onMessage, onError) => {
 };
 
 module.exports = {
+    check,
     publish,
     subscribe,
 };
