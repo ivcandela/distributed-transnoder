@@ -5,11 +5,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const express = require('express');
+
 const logging = require('./lib/logging');
 const pubsub = require('./lib/pubsub');
-const storage = require('./lib/storage');
-
-const TranscodingService = require('./services/transcoding');
+const TranscodingService = require('./services/transcoding.service');
 
 //Subscribing
 const defaultUnsubscribe = () => {
