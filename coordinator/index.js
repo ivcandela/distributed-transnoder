@@ -5,58 +5,36 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const express = require('express');
+const mustacheExpress = require('mustache-express');
+
 const logging = require('./lib/logging');
 const pubsub = require('./lib/pubsub');
-const storage = require('./lib/storage');
+const InputFilesService = require('./services/input-files.service');
+const MessageService = require('./services/message.service');
 
 //Express
 const app = express();
 
+// Register '.mustache' extension with The Mustache Express
+app.engine('mustache', mustacheExpress());
+
+app.set('view engine', 'mustache');
+app.set('views', __dirname + '/views');
+
 app.use(logging.requestLogger);
 
-app.get('/', (req, res) => {
-    res.send('OK');
+app.get('/', async (req, res) => {
+    const files = await InputFilesService.list();
+    const bucketName = InputFilesService.bucketName();
+
+    res.render('home', {files, bucketName});
 });
 
-//Publishing
-app.get('/publish/:message', (req, res) => {
-    const message = req.params.message;
-    const attributes = {lol: 'loller'};
-    pubsub.publish(message, attributes).then(function(messageId) {
-        logging.info('messageId', messageId);
-        res.send(`${message} should be published`);
-    }).catch(err => {
-        logging.error('publish err', err);
-        res.send(`ERR: ${message} could not be published`);
-    });
-});
+app.get('/transcode', async (req, res) => {
+    const bucketFileId = req.query.bucketFileId;
+    const messageId = await MessageService.transcode(bucketFileId);
 
-app.get('/bucket', (req, res) => {
-    storage
-        .listFiles()
-        .then(files => {
-            res.send(files.map(f=>f.name).join(','));
-        })
-        .catch((err) => {
-            logging.error(err);
-            res.send('ERR: could not read from bucket')
-        });
-});
-
-app.get('/bucket/:prefix', (req, res) => {
-    const options = {
-        prefix: req.params.prefix,
-    };
-
-    storage
-        .listFilesByPrefix(req.params.prefix)
-        .then(files => {
-            res.send(files.map(f=>f.name).join(','));
-        })
-        .catch((err) => {
-            logging.error(err);
-            res.send('ERR: could not read from bucket')
-        });
+    res.render('transcode', {bucketFileId, messageId});
 });
 
 // Errors
@@ -67,7 +45,7 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    res.status(500).send(err.response || 'Something broke!');
+    res.status(500).render('error', {message: JSON.stringify(err.response || 'Something Broke')});
 });
 
 // Spin up
