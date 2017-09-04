@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Corsi.it Transcoding Service</title>
+</head>
+<body>
+<h1>Scegli un file da processare</h1>
+<div>Bucket: <strong>{{bucketName}}</strong></div>
+<hr/>
+<div>
+    <ul>
+        {{#files}}
+            <li>{{name}} <form action="/transcode" method="get"><input type="hidden" name="bucketFileId" value="{{id}}"/><button type="submit">Transcode this shit</button></form></li>
+        {{/files}}
+    </ul>
+</div>
+</body>
+</html>
