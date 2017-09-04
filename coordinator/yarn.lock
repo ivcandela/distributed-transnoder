@@ -231,6 +231,10 @@ async@^2.0.1, async@^2.1.2, async@^2.3.0, async@^2.4.0:
   dependencies:
     lodash "^4.14.0"
 
+async@~0.2.10:
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/async/-/async-0.2.10.tgz#b6bbe0b0674b9d719708ca38de8c237cb526c3d1"
+
 async@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/async/-/async-1.0.0.tgz#f8fc04ca3a13784ade9e1641af98578cfbd647a9"
@@ -1037,6 +1041,10 @@ long@~3:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/long/-/long-3.2.0.tgz#d821b7138ca1cb581c172990ef14db200b5c474b"
 
+lru-cache@~2.5.0:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-2.5.2.tgz#1fddad938aae1263ce138680be1b3f591c0ab41c"
+
 make-dir@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-1.0.0.tgz#97a011751e91dd87cfadef58832ebb04936de978"
@@ -1108,6 +1116,18 @@ modelo@^4.2.0:
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
+
+mustache-express@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/mustache-express/-/mustache-express-1.2.5.tgz#172a48445a5de5cadc9f057f6a92a4afca07ae14"
+  dependencies:
+    async "~0.2.10"
+    lru-cache "~2.5.0"
+    mustache "~2.3.0"
+
+mustache@~2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/mustache/-/mustache-2.3.0.tgz#4028f7778b17708a489930a6e52ac3bca0da41d0"
 
 nan@^2.6.2:
   version "2.7.0"

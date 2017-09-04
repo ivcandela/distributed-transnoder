@@ -19,6 +19,7 @@
     "express": "^4.15.4",
     "express-winston": "^2.4.0",
     "lodash": "^4.17.4",
+    "mustache-express": "^1.2.5",
     "winston": "^2.3.1"
   }
 }
