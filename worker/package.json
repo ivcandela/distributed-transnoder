@@ -8,6 +8,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Ivan Candela <ivankcandela@gmail.com> (http://ivank.it)",
+  "engines": {
+    "node": "8.x"
+  },
   "license": "ISC",
   "dependencies": {
     "@google-cloud/debug-agent": "^2.1.3",

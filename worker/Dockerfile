@@ -7,6 +7,8 @@ RUN apt-get --allow-unauthenticated -y install deb-multimedia-keyring
 RUN apt-get --allow-unauthenticated -y update
 RUN apt-get --allow-unauthenticated -y install libav-tools ffmpeg
 
+RUN install_node v8.4.0
+
 RUN npm install --unsafe-perm --global yarn
 COPY . /app/
 
