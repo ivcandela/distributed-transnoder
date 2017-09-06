@@ -4,10 +4,12 @@ if (process.env.NODE_ENV === 'production') {
     require('@google-cloud/debug-agent').start();
 }
 
+const path = require('path');
 const express = require('express');
 
 const logging = require('./lib/logging');
 const pubsub = require('./lib/pubsub');
+const StorageService = require('./services/storage.service');
 const TranscodingService = require('./services/transcoding.service');
 
 //Subscribing
@@ -21,13 +23,25 @@ const onError = err => {
     logging.error('err', err);
 };
 
-const onMessage = message => {
+const onMessage = async message => {
     logging.info(`Received message ${message.id}:`);
     logging.info(`\tData: ${message.data}`);
     logging.info(`\tAttributes: ${JSON.stringify(message.attributes)}`);
 
+    const {data, attributes: {process, bucketFileId}} = message;
+
     message.ack();
     logging.info(`Message acknowledged ${message.id}`);
+
+    const destination = path.join(__dirname, 'tmp', bucketFileId);
+    const downloadComplete = await StorageService.downloadById(bucketFileId, destination);
+    logging.info('done downloading');
+    const transcodedVideo = await TranscodingService.transcode(destination);
+    logging.info('done transcoding');
+    const uploadComplete = await StorageService.upload(transcodedVideo, 'output/'+bucketFileId)
+    logging.info('done uploading');
+
+    logging.info('TRANSCODING COMPLETE 🎉')
 };
 
 pubsub
