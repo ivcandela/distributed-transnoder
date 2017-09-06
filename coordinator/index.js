@@ -9,7 +9,7 @@ const mustacheExpress = require('mustache-express');
 
 const logging = require('./lib/logging');
 const pubsub = require('./lib/pubsub');
-const InputFilesService = require('./services/input-files.service');
+const StorageService = require('./services/storage.service');
 const MessageService = require('./services/message.service');
 
 //Express
@@ -24,8 +24,8 @@ app.set('views', __dirname + '/views');
 app.use(logging.requestLogger);
 
 app.get('/', async (req, res) => {
-    const files = await InputFilesService.list();
-    const bucketName = InputFilesService.bucketName();
+    const files = await StorageService.input();
+    const bucketName = StorageService.bucketName();
 
     res.render('home', {files, bucketName});
 });
