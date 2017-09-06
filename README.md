@@ -9,3 +9,5 @@ To run in local:
  - `cd coordinator && yarn start`
  - `cd worker && yarn start`
  - visit `localhost:8080`
+
+ _PS: per testare `worker` in locale dovrebbe bastare avere `ffmpeg` installato, altrimenti si può runnare l'immagine docker (non l'ho provato così però)_
