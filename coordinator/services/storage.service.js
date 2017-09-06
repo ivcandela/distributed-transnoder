@@ -1,12 +1,12 @@
 const logging = require('../lib/logging');
 const storage = require('../lib/storage');
 
-class InputFilesService {
+class StorageService {
     constructor() {
         //
     }
 
-    async list() {
+    async input() {
         const files = await storage.listFilesByPrefix('input/');
 
         return files.filter(f => f.name !== 'input/');
@@ -17,6 +17,6 @@ class InputFilesService {
     }
 }
 
-const instance = new InputFilesService();
+const instance = new StorageService();
 
 module.exports = instance;
