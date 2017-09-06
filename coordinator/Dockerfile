@@ -1,5 +1,7 @@
 FROM gcr.io/google_appengine/nodejs
 
+RUN install_node v8.4.0
+
 RUN npm install --unsafe-perm --global yarn
 COPY . /app/
 
