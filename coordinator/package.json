@@ -9,6 +9,9 @@
   },
   "author": "Ivan Candela <ivankcandela@gmail.com> (http://ivank.it)",
   "license": "ISC",
+  "engines": {
+    "node": "8.x"
+  },
   "dependencies": {
     "@google-cloud/debug-agent": "^2.1.3",
     "@google-cloud/logging": "^1.0.6",
