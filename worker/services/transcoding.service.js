@@ -3,6 +3,7 @@ const _ = require('lodash');
 const fileExists = require('file-exists');
 const path = require('path');
 const fs = require('fs');
+const moment = require('moment');
 
 const logging = require('../lib/logging');
 
@@ -11,10 +12,11 @@ const LOGO_POSITION_FILEPATH = path.join(__dirname, '..', 'logo', 'logo.json');
 
 const _watermark = function (videoIn, videoInFilename, logo, logoPos) {
     return new Promise(function (resolve, reject) {
-        videoIn.fnAddWatermark(logo, path.join(__dirname, '..', 'tmp', 'out_' + path.basename(videoInFilename)), logoPos, function (error, file) {
+        videoIn.fnAddWatermark(logo, path.join(__dirname, '..', 'tmp', 'out' + moment().unix() + '_' + path.basename(videoInFilename)), logoPos, function (error, file) {
             if (!error) {
                 resolve(file);
             } else {
+                console.log('Watermarking Error');
                 reject(error);
             }
         });
@@ -41,7 +43,8 @@ const transcode = async (videoFilename) => {
         logging.info('videoOut', videoOutFilename);
         return videoOutFilename;
     } catch (err) {
-        logging.error('Error: ' + err);
+        logging.error('Transcoding Error: ' + err);
+        throw err;
     }
 };
 
