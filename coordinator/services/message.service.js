@@ -1,6 +1,8 @@
 const logging = require('../lib/logging');
 const pubsub = require('../lib/pubsub');
 
+const SUBSCRIPTION_NAME = process.env.NODE_ENV === 'production' ? 'worker_transcoding-subscription': 'test-worker_transcoding-subscription';
+
 const defaultUnsubscribe = () => {
     logging.warn('nothing to unsuscribe')
 };
@@ -9,6 +11,7 @@ class MessageService {
     constructor() {
         this._observableSource = null;
         this._unsubscribe = defaultUnsubscribe;
+        pubsub.check();
     }
 
     unsubscribe() {
@@ -16,12 +19,14 @@ class MessageService {
         this._unsubscribe = defaultUnsubscribe;
     }
 
-    async transcode(bucketFileId) {
+    async transcode(bucketFileId, outputDir, outputFileName) {
         const message = 'transcode';
 
         const attributes = {
             process: 'regular',
             bucketFileId,
+            outputDir,
+            outputFileName,
         };
 
         const messageId = await pubsub.publish(message, attributes);
@@ -29,25 +34,11 @@ class MessageService {
         return messageId;
     }
 
-    async subscribe() {
-        const onError = err => {
-            logging.error('err', err);
-        };
-
-        const onMessage = message => {
-            logging.info(`Received message ${message.id}:`);
-            logging.info(`\tData: ${message.data}`);
-            logging.info(`\tAttributes: ${JSON.stringify(message.attributes)}`);
-
-            message.ack();
-            logging.info(`Message acknowledged ${message.id}`);
-        };
-
-        return pubsub
-            .subscribe('test-subscription', onMessage, onError)
+    async subscribe(onMessage, onError) {
+        pubsub
+            .subscribe(SUBSCRIPTION_NAME, onMessage, onError)
             .then(unsubscribeFnc => {
                 this._unsubscribe = unsubscribeFnc;
-                return true;
             })
             .catch(err => {
                 logging.error('create subscription err', err);
