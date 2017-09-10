@@ -35,9 +35,15 @@ const onMessage = async message => {
         logging.info('starting transcoding');
         const transcodedVideo = await TranscodingService.transcode(destination);
         logging.info('done transcoding');
-        logging.info('starting uploading');
-        const uploadComplete = await StorageService.upload(transcodedVideo, outputDir + outputFileName)
-        logging.info('done uploading');
+        logging.info('starting uploading HD');
+        const hdUploadComplete = await StorageService.upload(transcodedVideo.hd, outputDir + 'hd_'+outputFileName)
+        logging.info('done uploading HD');
+        logging.info('starting uploading MD');
+        const mdUploadComplete = await StorageService.upload(transcodedVideo.md, outputDir + 'md_'+outputFileName)
+        logging.info('done uploading MD');
+        logging.info('starting uploading SD');
+        const sdUploadComplete = await StorageService.upload(transcodedVideo.sd, outputDir + 'sd_'+outputFileName)
+        logging.info('done uploading SD');
 
         logging.info('TRANSCODING COMPLETE 🎉')
     } catch (error) {
