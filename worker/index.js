@@ -11,13 +11,7 @@ const logging = require('./lib/logging');
 const pubsub = require('./lib/pubsub');
 const StorageService = require('./services/storage.service');
 const TranscodingService = require('./services/transcoding.service');
-
-//Subscribing
-const defaultUnsubscribe = () => {
-    logging.warn('nothing to unsuscribe')
-};
-
-let unsubscribe = defaultUnsubscribe;
+const MessageService = require('./services/message.service');
 
 const onError = err => {
     logging.error('err', err);
@@ -28,30 +22,31 @@ const onMessage = async message => {
     logging.info(`\tData: ${message.data}`);
     logging.info(`\tAttributes: ${JSON.stringify(message.attributes)}`);
 
-    const {data, attributes: {process, bucketFileId}} = message;
+    const {data, attributes: {process, bucketFileId, outputDir, outputFileName}} = message;
 
     message.ack();
+
     logging.info(`Message acknowledged ${message.id}`);
+    try {
+        const destination = path.join(__dirname, 'tmp', bucketFileId);
+        logging.info('starting downloading');
+        const downloadComplete = await StorageService.downloadById(bucketFileId, destination);
+        logging.info('done downloading');
+        logging.info('starting transcoding');
+        const transcodedVideo = await TranscodingService.transcode(destination);
+        logging.info('done transcoding');
+        logging.info('starting uploading');
+        const uploadComplete = await StorageService.upload(transcodedVideo, outputDir + outputFileName)
+        logging.info('done uploading');
 
-    const destination = path.join(__dirname, 'tmp', bucketFileId);
-    const downloadComplete = await StorageService.downloadById(bucketFileId, destination);
-    logging.info('done downloading');
-    const transcodedVideo = await TranscodingService.transcode(destination);
-    logging.info('done transcoding');
-    const uploadComplete = await StorageService.upload(transcodedVideo, 'output/'+bucketFileId)
-    logging.info('done uploading');
-
-    logging.info('TRANSCODING COMPLETE 🎉')
+        logging.info('TRANSCODING COMPLETE 🎉')
+    } catch (error) {
+        logging.info('Process Error (onMessage):', error);
+        //handleError
+    }
 };
 
-pubsub
-    .subscribe('test-subscription', onMessage, onError)
-    .then(unsubscribeFnc => {
-        unsubscribe = unsubscribeFnc;
-    })
-    .catch(err => {
-        logging.error('create subscription err', err);
-    });
+MessageService.subscribe(onMessage, onError);
 
 //Express
 const app = express();
