@@ -1,25 +1,25 @@
-
 const logging = require('./logging');
 const PubSub = require('@google-cloud/pubsub');
 
 const PROJECT_ID = process.env.PROJECT_ID || 'distributed-transnoder';
-const TOPICNAME = process.env.TOPICNAME || 'transcoding';
+const TOPICNAME = process.env.TOPICNAME || (process.env.NODE_ENV === 'production' ? 'transcoding' : 'test-transcoding');
 const TOPIC = `projects/${PROJECT_ID}/topics/${TOPICNAME}`;
 
 const pubsub = (process.env.NODE_ENV === 'production') ? PubSub() : PubSub({
     projectId: PROJECT_ID,
     credentials: require('../../keyfile.json'),
 });
+logging.info(`Project ID: ${PROJECT_ID}`);
+logging.info(`Subscription Topic: ${TOPIC}`);
 
 const topic = pubsub.topic(TOPIC);
 const publisher = topic.publisher();
 
 const check = () => {
     topic.exists().then(results => {
-
         const exists = results[0];
-        if (!exists) {
 
+        if (!exists) {
             logging.info(`Topic ${TOPIC} does not exist yet`);
             topic.create().then(results => {
                 logging.info(`Topic ${TOPIC} created`)
@@ -39,7 +39,7 @@ const check = () => {
 const publish = (message, attributes = {}) => {
     message = new Buffer(message);
 
-    return publisher.publish(message, attributes).then(function(messageIds) {
+    return publisher.publish(message, attributes).then(function (messageIds) {
         logging.info('messageId', messageIds[0]);
         return messageIds[0];
     }).catch(err => {
