@@ -4,6 +4,7 @@ if (process.env.NODE_ENV === 'production') {
     require('@google-cloud/debug-agent').start();
 }
 
+const _ = require('lodash');
 const express = require('express');
 const mustacheExpress = require('mustache-express');
 
@@ -24,15 +25,21 @@ app.set('views', __dirname + '/views');
 app.use(logging.requestLogger);
 
 app.get('/', async (req, res) => {
-    const files = await StorageService.input();
+    const files = (await StorageService.input()).map(f => {
+        const name = _.replace(f.name, /^input\//, '');
+        return {
+            id: f.id,
+            name,
+        };
+    });
     const bucketName = StorageService.bucketName();
 
     res.render('home', {files, bucketName});
 });
 
 app.get('/transcode', async (req, res) => {
-    const bucketFileId = req.query.bucketFileId;
-    const messageId = await MessageService.transcode(bucketFileId);
+    const {bucketFileId, outputDirName, outputFileName} = req.query;
+    const messageId = await MessageService.transcode(bucketFileId, outputDirName, outputFileName);
 
     res.render('transcode', {bucketFileId, messageId});
 });
