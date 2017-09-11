@@ -1,3 +1,4 @@
+service: coordinator
 runtime: custom
 env: flex
 manual_scaling:
