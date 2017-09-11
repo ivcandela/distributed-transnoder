@@ -1,0 +1,32 @@
+{
+  "name": "distributed-transnoder-worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ivan Candela <ivankcandela@gmail.com> (http://ivank.it)",
+  "engines": {
+    "node": "8.x"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/debug-agent": "^2.1.3",
+    "@google-cloud/logging": "^1.0.6",
+    "@google-cloud/logging-winston": "^0.5.0",
+    "@google-cloud/pubsub": "^0.14.0",
+    "@google-cloud/storage": "^1.2.1",
+    "@google-cloud/trace-agent": "^2.1.3",
+    "express": "^4.15.4",
+    "express-winston": "^2.4.0",
+    "ffmpeg": "0.0.4",
+    "file-exists": "^4.0.0",
+    "glob": "^7.1.2",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
+    "mustache-express": "^1.2.5",
+    "winston": "^2.3.1"
+  }
+}
