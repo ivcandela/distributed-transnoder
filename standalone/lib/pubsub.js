@@ -2,7 +2,7 @@
 const logging = require('./logging');
 const PubSub = require('@google-cloud/pubsub');
 
-const PROJECT_ID = process.env.PROJECT_ID || 'distributed-transnoder';
+const PROJECT_ID = process.env.PROJECT_ID || '';
 const TOPICNAME = process.env.TOPICNAME || (process.env.NODE_ENV === 'production' ? 'transcoding': 'test-transcoding');
 const TOPIC = `projects/${PROJECT_ID}/topics/${TOPICNAME}`;
 

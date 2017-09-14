@@ -1,7 +1,7 @@
 const Storage = require('@google-cloud/storage');
 const logging = require('./logging');
 
-const PROJECT_ID = process.env.PROJECT_ID || 'distributed-transnoder';
+const PROJECT_ID = process.env.PROJECT_ID || '';
 const BUCKETNAME = process.env.BUCKETNAME || `${PROJECT_ID}.appspot.com`;
 
 const storage = (process.env.NODE_ENV === 'production') ? Storage() : Storage({
