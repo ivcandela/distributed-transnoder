@@ -16,10 +16,6 @@
                 <span>Cartella</span>
                 <input type="text" id="outputDirName" onkeydown="handleChangeOutputDirName(event)" onkeyup="handleChangeOutputDirName(event)" placeholder="Cartella di output" value="output/"/>
             </div>
-            <div>
-                <span>File</span>
-                <input type="text" id="outputFileName" onkeydown="handleChangeOutputFileName(event)" onkeyup="handleChangeOutputFileName(event)" placeholder="Nome File" value=""/>
-            </div>
             <em>Lasciare vuoto il nome file per utilizzare lo stesso del file già presente</em>
         </div>
     </div>
@@ -31,7 +27,10 @@
                 <form action="/transcode" method="get">
                     <input type="hidden" name="bucketFileId" value="{{id}}"/>
                     <input type="hidden" id="outputDirName-{{id}}" name="outputDirName" value=""/>
-                    <input type="hidden" id="outputFileName-{{id}}" name="outputFileName" value=""/>
+                    <div>
+                        <span>File</span>
+                        <input type="text" id="outputFileName-{{id}}" name="outputFileName" onkeydown="handleChangeOutputFileName(event, '{{id}}')" onkeyup="handleChangeOutputFileName(event, '{{id}}')" placeholder="Nome File" value=""/>
+                    </div>
                     <button type="submit">Transcode this shit</button>
                 </form>
             </li>
@@ -51,10 +50,12 @@
         applyChanges();
     }
 
-    function handleChangeOutputFileName(event) {
+    function handleChangeOutputFileName(event, id) {
         var outputFile = event.target.value;
         elements = elements.map(function(element) {
-            element.file = outputFile;
+            if(element.id === id) {
+                element.file = outputFile;
+            }
             return element;
         });
         applyChanges();
@@ -63,7 +64,6 @@
     function applyChanges() {
         elements.forEach(function(element) {
             document.getElementById('outputDirName-'+element.id).value =  element.dir;
-            document.getElementById('outputFileName-'+element.id).value =  element.file || element.original;
             document.getElementById('preview-'+element.id).innerHTML = element.dir + (element.file || element.original);
         });
     }
