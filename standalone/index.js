@@ -27,14 +27,8 @@ app.set('views', __dirname + '/views');
 app.use(logging.requestLogger);
 
 app.get('/', async (req, res) => {
-    const files = (await StorageService.input()).map(f => {
-        const name = _.replace(f.name, /^input\//, '');
-        return {
-            id: f.id,
-            name,
-        };
-    });
-    const bucketName = StorageService.bucketName();
+    const files = (await StorageService.listInput());
+    const bucketName = StorageService.inputBucketName();
 
     res.render('home', {files, bucketName});
 });
@@ -47,7 +41,7 @@ app.get('/transcode', async (req, res) => {
             const destination = path.join(__dirname, 'tmp', bucketFileId);
             logging.info(bucketFileId, 'starting downloading');
             const downloadComplete = await
-            StorageService.downloadById(bucketFileId, destination);
+            StorageService.downloadFromInputById(bucketFileId, destination);
             logging.info(bucketFileId, 'done downloading');
             logging.info(bucketFileId, 'starting transcoding');
             const transcodedVideo = await
@@ -55,15 +49,15 @@ app.get('/transcode', async (req, res) => {
             logging.info(bucketFileId, 'done transcoding');
             logging.info(bucketFileId, 'starting uploading HD');
             const hdUploadComplete = await
-            StorageService.upload(transcodedVideo.hd, outputDirName + 'hd_' + outputFileName)
+            StorageService.uploadToOutput(transcodedVideo.hd, outputDirName + 'hd_' + outputFileName)
             logging.info(bucketFileId, 'done uploading HD');
             logging.info(bucketFileId, 'starting uploading MD');
             const mdUploadComplete = await
-            StorageService.upload(transcodedVideo.md, outputDirName + 'md_' + outputFileName)
+            StorageService.uploadToOutput(transcodedVideo.md, outputDirName + 'md_' + outputFileName)
             logging.info(bucketFileId, 'done uploading MD');
             logging.info(bucketFileId, 'starting uploading SD');
             const sdUploadComplete = await
-            StorageService.upload(transcodedVideo.sd, outputDirName + 'sd_' + outputFileName)
+            StorageService.uploadToOutput(transcodedVideo.sd, outputDirName + 'sd_' + outputFileName)
             logging.info(bucketFileId, 'done uploading SD');
 
             logging.info(bucketFileId, 'TRANSCODING COMPLETE 🎉')

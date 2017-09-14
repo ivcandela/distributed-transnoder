@@ -2,16 +2,15 @@ const Storage = require('@google-cloud/storage');
 const logging = require('./logging');
 
 const PROJECT_ID = process.env.PROJECT_ID || '';
-const BUCKETNAME = process.env.BUCKETNAME || `${PROJECT_ID}.appspot.com`;
 
 const storage = (process.env.NODE_ENV === 'production') ? Storage() : Storage({
     projectId: PROJECT_ID,
     credentials: require('../../keyfile.json'),
 });
 
-const listFiles = (options = {}) =>
+const listFiles = (bucket, options = {}) =>
     storage
-        .bucket(BUCKETNAME)
+        .bucket(bucket)
         .getFiles(options)
         .then((results) => {
             const files = results[0];
@@ -30,16 +29,16 @@ const listFiles = (options = {}) =>
 
 const listFilesByPrefix = prefix => listFiles({prefix});
 
-const upload = (filename, destination) => {
+const upload = (bucket, filename, destination) => {
     const options = {
         destination,
     };
 
     return storage
-        .bucket(BUCKETNAME)
+        .bucket(bucket)
         .upload(filename, options)
         .then(() => {
-            console.log(`${filename} uploaded to ${BUCKETNAME}/${destination}.`);
+            console.log(`${filename} uploaded to ${bucket}/${destination}.`);
             return true;
         })
         .catch((err) => {
@@ -48,17 +47,17 @@ const upload = (filename, destination) => {
         });
 }
 
-const download = (srcFilename, destFilename) => {
+const download = (bucket, srcFilename, destFilename) => {
     const options = {
         destination: destFilename
     };
 
     return storage
-        .bucket(BUCKETNAME)
+        .bucket(bucket)
         .file(srcFilename)
         .download(options)
         .then(() => {
-            console.log(`gs://${BUCKETNAME}/${srcFilename} downloaded to ${destFilename}.`);
+            console.log(`gs://${bucket}/${srcFilename} downloaded to ${destFilename}.`);
             return true;
         })
         .catch((err) => {
@@ -67,13 +66,13 @@ const download = (srcFilename, destFilename) => {
         });
 }
 
-const destroy = filename => {
+const destroy = (bucket, filename) => {
     return storage
-        .bucket(BUCKETNAME)
+        .bucket(bucket)
         .file(filename)
         .delete()
         .then(() => {
-            console.log(`gs://${BUCKETNAME}/${filename} deleted.`);
+            console.log(`gs://${bucket}/${filename} deleted.`);
             return true;
         })
         .catch((err) => {
@@ -81,8 +80,8 @@ const destroy = filename => {
             throw err;
         });
 }
+
 module.exports = {
-    BUCKETNAME,
     listFiles,
     listFilesByPrefix,
     upload,
