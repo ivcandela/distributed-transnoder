@@ -6,6 +6,8 @@ if (process.env.NODE_ENV === 'production') {
     require('@google-cloud/debug-agent').start();
 }
 
+require('dotenv').config();
+
 const _ = require('lodash');
 const express = require('express');
 const mustacheExpress = require('mustache-express');
