@@ -14,7 +14,7 @@ __local development__
 
 __deployment__
   - `cd standalone && gcloud app deploy`
-  - visit `https://{PROJECT_ID}.appspot.com/`
+  - `gcloud app browse`
 
 ##### DISTRIBUTED
 __local development__
@@ -25,6 +25,6 @@ __local development__
 __deployment__
  - `cd coordinator && gcloud app deploy coordinator.yaml`
  - `cd worker && gcloud app deploy worker.yaml`
- - visit `https://coordinator-dot-{PROJECT_ID}.appspot.com/`
+ - `gcloud app browse` in `coordinator` folder
 
  _PS: per testare `standalone` e `worker` in locale dovrebbe bastare avere `ffmpeg` installato, altrimenti si può runnare l'immagine docker (non l'ho provato così però)_
