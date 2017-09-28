@@ -3,87 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Corsi.it Transcoding Service</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 </head>
 <body>
-<h1>Scegli un file da processare</h1>
-<div>Bucket: <strong>{{bucketName}}</strong></div>
-<hr/>
-<div>
-    <div>
-        <div>
-            <strong>Scegli la cartella di destinazione sul bucket e il nome del file</strong><br/>
-            <div>
-                <span>Cartella</span>
-                <input type="text" id="outputDirName" onkeydown="handleChangeOutputDirName(event)" onkeyup="handleChangeOutputDirName(event)" placeholder="Cartella di output" value="output/"/>
-            </div>
-            <em>Lasciare vuoto il nome file per utilizzare lo stesso del file già presente</em>
+<div class="container">
+    <h1>Inserisci un prefisso per filtrare i file nel bucket {{bucketName}}</h1>
+    <em>Un input più preciso risulterà in una ricerca più veloce</em>
+    <hr/>
+    <form action="/choose">
+        <div class="form-group">
+            <input class="form-control" name="p" placeholder="Master/"/><br/>
         </div>
-    </div>
-    <ul>
-        {{#files}}
-            <li>
-                <span>Nome originale:</span> {{name}}<br/>
-                <span>Output: </span> <span id="preview-{{id}}"></span><br/>
-                <form action="/transcode" method="get">
-                    <input type="hidden" name="bucketFileId" value="{{id}}"/>
-                    <input type="hidden" id="outputDirName-{{id}}" name="outputDirName" value=""/>
-                    <div>
-                        <span>File</span>
-                        <input type="text" id="outputFileName-{{id}}" name="outputFileName" onkeydown="handleChangeOutputFileName(event, '{{id}}')" onkeyup="handleChangeOutputFileName(event, '{{id}}')" placeholder="Nome File" value=""/>
-                    </div>
-                    <button type="submit">Transcode this shit</button>
-                </form>
-            </li>
-        {{/files}}
-    </ul>
+        <div class="form-group">
+            <button class="btn btn-success" type="submit">Cerca file</button>
+        </div>
+    </form>
 </div>
-<script>
-
-    var elements = [];
-
-    function handleChangeOutputDirName(event) {
-        var outputDir = event.target.value;
-        elements = elements.map(function(element) {
-            element.dir = outputDir;
-            return element;
-        });
-        applyChanges();
-    }
-
-    function handleChangeOutputFileName(event, id) {
-        var outputFile = event.target.value;
-        elements = elements.map(function(element) {
-            if(element.id === id) {
-                element.file = outputFile;
-            }
-            return element;
-        });
-        applyChanges();
-    }
-
-    function applyChanges() {
-        elements.forEach(function(element) {
-            document.getElementById('outputDirName-'+element.id).value =  element.dir;
-            document.getElementById('preview-'+element.id).innerHTML = element.dir + (element.file || element.original);
-        });
-    }
-
-    function registerFormElement(id, name) {
-        elements.push({
-            id: id,
-            dir: 'output/',
-            file: '',
-            original: name,
-        });
-    }
-
-    window.onload = (function() {
-        {{#files}}
-            registerFormElement('{{id}}', '{{name}}');
-        {{/files}}
-        applyChanges()
-    });
-
-</script>
 </body>
 </html>
