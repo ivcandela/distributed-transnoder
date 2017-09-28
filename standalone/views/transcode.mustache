@@ -2,9 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Transcode {{bucketFileId}} | Corsi.it Transcoding Service</title>
+    <title>Transcoding {{bucketFileName}} | Corsi.it Transcoding Service</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
 </head>
 <body>
-Transcoding di {{bucketFileId}}
+<div class="container">
+    <div>
+        Il processo di transcoding del file <code>{{bucketFileName}}</code>, nella cartella di output <code>{{outputDirName}}</code>, con logo <code>{{logoId}}</code>, e posizione <code>{{logoPositionJson}}</code> é <strong>iniziato correttamente</strong>
+    </div>
+    <div>
+        <h3>File in coda per il transcoding</h3>
+        <ul>
+            {{#filesToTranscode}}
+                <li>{{name}}</li>
+            {{/filesToTranscode}}
+        </ul>
+    </div>
+</div>
 </body>
 </html>
