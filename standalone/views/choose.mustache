@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Corsi.it Transcoding Service</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+</head>
+<body>
+<div class="container">
+    <hr/>
+    <div class="row">
+        <form action="/choose">
+            <div class="col-md-10">
+                <input class="form-control" name="p" placeholder="Master/" value="{{prefix}}"/><br/>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-success" type="submit">Scegli un altro filtro</button>
+            </div>
+        </form>
+    </div>
+    <h1>Scegli un file da processare</h1>
+    <div>
+        Bucket di Input:
+        <strong>{{inputBucketName}}</strong>
+    </div>
+    <div>
+        Bucket di Output:
+        <strong>{{outputBucketName}}</strong>
+    </div>
+    <hr/>
+    <div>
+        <div>
+            <div>
+                <strong>Scegli la cartella di destinazione nel bucket di output</strong>
+                <br/>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="outputDirName" placeholder="Cartella di output" value=""/>
+                </div>
+            </div>
+        </div>
+        <hr/>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Cartella</th>
+                    <th>File Logo</th>
+                    <th>Posizione</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#files}}
+                <tr>
+                    <form action="/transcode" method="get" target="_blank" onsubmit="return handleSubmit('{{id}}')">
+                        <input type="hidden" name="bucketFileName" value="{{name}}"/>
+                        <input type="hidden" id="outputDirName-{{id}}" name="outputDirName" value=""/>
+                        <td><code>{{name}}</code></td>
+                        <td>
+                            <select name="logoId">
+                                <option value="default" selected>Default</option>
+                                {{#logos}}
+                                    <option value="{{id}}">{{name}}</option>
+                                {{/logos}}
+                            </select>
+                        </td>
+                        <td>
+                            <textarea class="form-control" name="logoPositionJson" placeholder='Formato Json Es: {"position":"NE","margin_nord":15}'></textarea>
+                        </td>
+                        <td>
+                            <button id="submit-{{id}}" class="btn btn-success pull-right" type="submit">Avvia Transcoding</button>
+                        </td>
+                    </form>
+                </tr>
+            {{/files}}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    function handleSubmit(id) {
+        var element = document.getElementById('submit-'+id);
+        if(~element.className.indexOf('disabled')){
+            return false;
+        }
+        element.className += ' disabled';
+        element.innerHTML = 'Transcoding richiesto';
+        return true;
+    }
+</script>
+</body>
+</html>
