@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const path = require('path');
 
 const logging = require('../lib/logging');
 const storage = require('../lib/storage');
@@ -11,8 +12,14 @@ class StorageService {
         //
     }
 
-    async listInput() {
-        const files = await storage.listFiles(INPUT_BUCKETNAME);
+    async listInputFiles(extension, prefix) {
+        const files = await storage.listFiles(INPUT_BUCKETNAME, {prefix});
+
+        return files.filter(file => path.extname(file.name) === extension);
+    }
+
+    async listInputDirectories(prefix) {
+        const files = await storage.listDirectories(INPUT_BUCKETNAME, {prefix});
 
         return files;
     }
@@ -26,15 +33,8 @@ class StorageService {
     }
 
 
-    async downloadFromInputById(bucketFileId, destination) {
-        const files = await this.listInput();
-
-        const fileToDownload = _.find(files, f => f.id === bucketFileId);
-        if(!fileToDownload) {
-            throw new Error(`No File with id ${bucketFileId} found in bucket ${BUCKETNAME}`);
-        }
-
-        return await storage.download(INPUT_BUCKETNAME, fileToDownload.name, destination);
+    async downloadFromInput(bucketFileName, destination) {
+        return await storage.download(INPUT_BUCKETNAME, bucketFileName, destination);
     };
 
     async uploadToOutput(localFilename, destination) {
