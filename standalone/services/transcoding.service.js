@@ -7,8 +7,12 @@ const moment = require('moment');
 
 const logging = require('../lib/logging');
 
-const LOGO_IMAGE_FILEPATH = path.join(__dirname, '..', 'logo', 'logo.png');
-const LOGO_POSITION_FILEPATH = path.join(__dirname, '..', 'logo', 'logo.json');
+const DEFAULT_LOGO_IMAGE_FILEPATH = path.join(__dirname, '..', 'logo', 'logo.png');
+const DEFAULT_LOGO_POSITION = {
+    "position": "NE",
+    "margin_nord": 15,
+    "margin_east": 20
+};
 
 const _tmpFilename = (step, videoInFilename) => {
   return path.join(__dirname, '..', 'tmp', 'out-' + moment().unix() + '_' +step+ '_' + path.basename(videoInFilename));
@@ -55,27 +59,23 @@ const _md = async videoFilename => {
     return tmpFilename;
 };
 
-const transcode = async (videoFilename) => {
+const transcode = async (videoFilename, {logo = DEFAULT_LOGO_IMAGE_FILEPATH, position = DEFAULT_LOGO_POSITION}) => {
     try {
         const transcodingProcess = new FFmpeg(videoFilename);
         const video = await transcodingProcess;
-        logging.info('logo.png fileName', LOGO_IMAGE_FILEPATH);
-        logging.info('logo.json fileName', LOGO_POSITION_FILEPATH);
-        if (!fileExists.sync(LOGO_IMAGE_FILEPATH)) {
+        logging.info('logo.png fileName', logo);
+        if (!fileExists.sync(logo)) {
             logging.error('No logo.png specified for video ' + videoFilename);
             return;
         }
-        if (!fileExists.sync(LOGO_POSITION_FILEPATH)) {
-            logging.error('No logo.json specified for video' + videoFilename);
-            return;
-        }
-        const logoPosObj = JSON.parse(fs.readFileSync(LOGO_POSITION_FILEPATH, 'utf8'));
+
+        const logoPosObj = position;
         logging.info('starting watermarking');
-        const videoOutFilename = await _watermark(video, videoFilename, LOGO_IMAGE_FILEPATH, logoPosObj);
+        const videoOutFilename = await _watermark(video, videoFilename, logo, logoPosObj);
         logging.info('finished watermarking', videoOutFilename);
 
         const mdVideoOutFilename = await _md(videoOutFilename);
-        const sdVideoOutFilename = await _sd(videoOutFilename);
+        const sdVideoOutFilename = await _sd(mdVideoOutFilename);
 
         const videoFilenames = {
             hd: videoOutFilename,
@@ -91,4 +91,6 @@ const transcode = async (videoFilename) => {
 
 module.exports = {
     transcode,
+    DEFAULT_LOGO_IMAGE_FILEPATH,
+    DEFAULT_LOGO_POSITION,
 };
